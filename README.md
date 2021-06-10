@@ -13,7 +13,7 @@ $ yarn start
 $ git commit -m '<Prefix>: Message here...'
 ```
 
-> 🐥 Prefix
+> 🐥  Prefix
 
 - chore: プロダクションコードに変更を加えない作業
 - docs: ドキュメントの修正、更新
@@ -23,3 +23,12 @@ $ git commit -m '<Prefix>: Message here...'
 - refactor: バグ修正や機能追加ではないコードの変更
 - style: 空白、書式設定、セミコロンの欠落など
 - test: テストの追加、修正
+
+## Debug
+```bash
+node --experimental-repl-await
+> require('isomorphic-fetch')
+> await fetch('http://localhost:3000/api/todos')
+> await fetch("http://localhost:3000/api/todos", {method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "test" })})
+> console.log(_.status, await _.json())
+```

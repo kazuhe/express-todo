@@ -17,5 +17,6 @@ module.exports = {
 
   rules: {
     'prettier/prettier': ['error', { singleQuote: true, semi: false }],
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
 }

@@ -54,3 +54,18 @@ app.use((err, _req, res, _next) => {
 })
 
 app.listen(3000)
+
+// ユニバーサルWebアプリケーションでは、ルーティングの挙動もサーバサイドとクライアントサイドで一貫性が必要
+// 以降Next.jsによるルーティングの記述
+const next = require('next')
+const dev = process.env.NODE_ENV !== 'production'
+const nextApp = next({ dev })
+
+nextApp.prepare().then(
+  // pagesディレクトリ内の各Reactコンポーネントに対するサーバサイドルーティング
+  () => app.get('*', nextApp.getRequestHandler()),
+  (err) => {
+    console.log(err)
+    process.exit(1)
+  }
+)

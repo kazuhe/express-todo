@@ -7,15 +7,22 @@ module.exports = {
     node: true,
   },
 
-  plugins: ['prettier'],
+  plugins: ['react', 'prettier'],
 
-  extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:prettier/recommended',
+  ],
 
   parserOptions: {
     ecmaVersion: 2021,
+    sourceType: 'module',
   },
 
   rules: {
+    'react/prop-types': 'off',
+    'react/react-in-jsx-scope': 'off',
     'prettier/prettier': ['error', { singleQuote: true, semi: false }],
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },

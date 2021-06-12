@@ -28,7 +28,10 @@ $ git commit -m '<Prefix>: Message here...'
 ```bash
 node --experimental-repl-await
 > require('isomorphic-fetch')
+
 > await fetch('http://localhost:3000/api/todos')
 > await fetch("http://localhost:3000/api/todos", {method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "test" })})
+> await fetch("http://localhost:3000/api/todos", {method: "PUT"})
+
 > console.log(_.status, await _.json())
 ```

@@ -5,9 +5,9 @@ import 'isomorphic-fetch'
 
 // 各ページに関する情報の定義
 const pages = {
-  index: { title: '全てのtodo', fetchQuery: '' },
-  active: { title: '未完了のtodo', fetchQuery: '?completed=false' },
-  completed: { title: '完了したtodo', fetchQuery: '?completed=true' },
+  index: { title: '全てのtodo' },
+  active: { title: '未完了のtodo', completed: false },
+  completed: { title: '完了したtodo', completed: true },
 }
 
 // CSRでページを切り替えるためのリンク
@@ -18,13 +18,31 @@ const pageLinks = Object.keys(pages).map((page, index) => (
 ))
 
 export default function Todos(props) {
-  const { title, fetchQuery } = pages[props.page]
+  const { title, completed } = pages[props.page]
 
   const [todos, setTodos] = useState([])
   useEffect(() => {
-    fetch(`/api/todos${fetchQuery}`).then(async (res) =>
-      res.ok ? setTodos(await res.json()) : alert(await res.text())
-    )
+    // fetch(`/api/todos${completed}`).then(async (res) =>
+    //   res.ok ? setTodos(await res.json()) : alert(await res.text())
+    // )
+
+    // EventSourceを使った実装
+    const eventSource = new EventSource('/api/todos/events')
+    // SSE受信時の処理
+    eventSource.addEventListener('message', (e) => {
+      const todos = JSON.parse(e.data)
+      setTodos(
+        typeof completed === 'undefined'
+          ? todos
+          : todos.filter((todo) => todo.completed === completed)
+      )
+    })
+
+    // エラーハンドリング
+    eventSource.addEventListener('error', (e) => console.log('SSEエラー', e))
+
+    // useEffectの副作用を用いてEventSourceインスタンスをクローズ
+    return () => eventSource.close()
   }, [props.page])
 
   return (

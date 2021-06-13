@@ -27,8 +27,45 @@ app.get('/api/todos', (req, res) => {
 // todoのid管理
 let id = 2
 
+// 全クライアントに対するSSE送信関数を保持する配列
+let sseSenders = []
+// SSEのIDを管理するための変数
+let sseId = 1
+
 /**
- * POST:
+ * GET: todoの一覧取得（SSE）
+ *
+ * /api/todos/events
+ */
+app.get('/api/todos/events', (req, res) => {
+  // タイムアウトを抑止（クライアント側からのリクエストが途切れない）
+  req.socket.setTimeout(0)
+  res.set({
+    'Content-Type': 'text/event-stream',
+  })
+  // クライアントにSSEを送信する関数を作成して登録
+  const send = (id, data) => res.write(`id: ${id}\ndata:${data}\n\n`)
+  sseSenders.push(send)
+  // リクエスト発生時点の状態を送信（初回）
+  send(sseId, JSON.stringify(todos))
+  // リクエストがクローズされたらレスポンスを終了してSSE送信関数を配列から削除
+  req.on('close', () => {
+    res.end()
+    sseSenders = sseSenders.filter((_send) => _send !== send)
+  })
+})
+
+/**
+ * todoの更新に伴い、全クライアントに対してSSEを送信する
+ */
+function onUpdateTodos() {
+  sseId += 1
+  const data = JSON.stringify(todos)
+  sseSenders.forEach((send) => send(sseId, data))
+}
+
+/**
+ * POST: todoの新規登録
  *
  * /api/todos
  */
@@ -46,6 +83,8 @@ app.post('/api/todos', (req, res, next) => {
   todos.push(todo)
   // ステータスコード201(Created)で返す
   res.status(201).json(todo)
+
+  onUpdateTodos()
 })
 
 // 指定されたIDのtodoを取得するためのミドルウェア
